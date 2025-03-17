@@ -4,6 +4,14 @@ import java.awt.event.*;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
+import com.sun.net.httpserver.HttpServer;
+import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.HttpExchange;
+import java.net.InetSocketAddress;
+import java.io.IOException;
+
+
+
 
 
 // Model.java
@@ -328,6 +336,22 @@ class CalculatorController {
 // Main.java
 public class Calculator {
     public static void main(String[] args) {
+
+        int port = Integer.parseInt(System.getenv().getOrDefault("PORT", "10000"));
+        System.out.println("Starting HTTP server on port: " + port);
+
+        try {
+            HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
+            server.createContext("/", exchange -> {
+                String response = "Maths is FUN!";
+                exchange.sendResponseHeaders(200, response.getBytes().length);
+                exchange.getResponseBody().write(response.getBytes());
+                exchange.close();
+            });
+            server.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         System.setProperty("DISPLAY", ":99");
         SwingUtilities.invokeLater(() -> {
