@@ -9,6 +9,8 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
 import java.net.InetSocketAddress;
 import java.io.IOException;
+import java.io.OutputStream;
+
 
 
 
@@ -337,36 +339,40 @@ class CalculatorController {
 public class Calculator {
     public static void main(String[] args) {
 
+        // Get port from environment, default to 10000
         int port = Integer.parseInt(System.getenv().getOrDefault("PORT", "10000"));
         System.out.println("Starting HTTP server on port: " + port);
 
-        // Run HTTP server in a separate thread
-        new Thread(() -> {
-            try {
-                HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
-                server.createContext("/", exchange -> {
-                    if ("HEAD".equalsIgnoreCase(exchange.getRequestMethod())) {
-                        exchange.sendResponseHeaders(200, -1); // No content for HEAD
-                    } else {
-                        String response = "Maths is FUN!";
-                        exchange.sendResponseHeaders(200, response.getBytes().length);
-                        exchange.getResponseBody().write(response.getBytes());
-                    }
-                    exchange.close();
-                });
-                server.start();
-                System.out.println("HTTP server started successfully!");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }).start(); // Start in a separate thread
+        try {
+            // Create a basic HTTP server
+            HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
+            server.createContext("/", new MyHttpHandler());
+            server.setExecutor(null); // Default executor
+            server.start();
+            System.out.println("HTTP Server started at http://localhost:" + port);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-
+        // Needed for GUI to work on certain systems
         System.setProperty("DISPLAY", ":99");
+
         SwingUtilities.invokeLater(() -> {
             CalculatorModel model = new CalculatorModel();
             CalculatorView view = new CalculatorView();
             CalculatorController controller = new CalculatorController(model, view);
         });
+    }
+
+    // Simple HTTP handler to return a response
+    static class MyHttpHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            String response = "Maths is FUN! Calculator is running.";
+            exchange.sendResponseHeaders(200, response.length());
+            OutputStream os = exchange.getResponseBody();
+            os.write(response.getBytes());
+            os.close();
+        }
     }
 }
