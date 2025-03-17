@@ -328,6 +328,8 @@ class CalculatorController {
 // Main.java
 public class Calculator {
     public static void main(String[] args) {
+
+        System.setProperty("DISPLAY", ":99");
         SwingUtilities.invokeLater(() -> {
             CalculatorModel model = new CalculatorModel();
             CalculatorView view = new CalculatorView();
