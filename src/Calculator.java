@@ -340,18 +340,27 @@ public class Calculator {
         int port = Integer.parseInt(System.getenv().getOrDefault("PORT", "10000"));
         System.out.println("Starting HTTP server on port: " + port);
 
-        try {
-            HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
-            server.createContext("/", exchange -> {
-                String response = "Maths is FUN!";
-                exchange.sendResponseHeaders(200, response.getBytes().length);
-                exchange.getResponseBody().write(response.getBytes());
-                exchange.close();
-            });
-            server.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        // Run HTTP server in a separate thread
+        new Thread(() -> {
+            try {
+                HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
+                server.createContext("/", exchange -> {
+                    if ("HEAD".equalsIgnoreCase(exchange.getRequestMethod())) {
+                        exchange.sendResponseHeaders(200, -1); // No content for HEAD
+                    } else {
+                        String response = "Maths is FUN!";
+                        exchange.sendResponseHeaders(200, response.getBytes().length);
+                        exchange.getResponseBody().write(response.getBytes());
+                    }
+                    exchange.close();
+                });
+                server.start();
+                System.out.println("HTTP server started successfully!");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }).start(); // Start in a separate thread
+
 
         System.setProperty("DISPLAY", ":99");
         SwingUtilities.invokeLater(() -> {
