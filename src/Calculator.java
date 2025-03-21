@@ -339,6 +339,8 @@ class CalculatorController {
 public class Calculator {
     public static void main(String[] args) {
 
+        System.out.println("Starting the Calculator...");
+
         // Get port from environment, default to 10000
         int port = Integer.parseInt(System.getenv().getOrDefault("PORT", "10000"));
         System.out.println("Starting HTTP server on port: " + port);
@@ -349,18 +351,19 @@ public class Calculator {
             server.createContext("/", new MyHttpHandler());
             server.setExecutor(null); // Default executor
             server.start();
-            System.out.println("HTTP Server started at http://localhost:" + port);
+            System.out.println("HTTP Server started successfully!");
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         // Needed for GUI to work on certain systems
-        System.setProperty("DISPLAY", ":99");
-
+        //System.setProperty("DISPLAY", ":99");
+        System.out.println("Launching GUI...");
         SwingUtilities.invokeLater(() -> {
             CalculatorModel model = new CalculatorModel();
             CalculatorView view = new CalculatorView();
             CalculatorController controller = new CalculatorController(model, view);
+            System.out.println("GUI should be visible now.");
         });
     }
 
